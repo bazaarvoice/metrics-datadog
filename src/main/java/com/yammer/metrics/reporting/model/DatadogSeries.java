@@ -1,12 +1,12 @@
 package com.yammer.metrics.reporting.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class DatadogSeries<T extends Number> {
 
@@ -21,21 +21,25 @@ public abstract class DatadogSeries<T extends Number> {
     private final Pattern tagPattern = Pattern.compile("([\\w\\.]+)\\[([\\w\\W]+)\\]");
 
     public DatadogSeries(String name, T count, Long epoch, String host) {
-        Matcher matcher = tagPattern.matcher(name);
-        this.tags = new ArrayList<String>();
-
-        if (matcher.find() && matcher.groupCount() == 2) {
-            this.name = matcher.group(1);
-            for(String t : matcher.group(2).split("\\,")) {
-                this.tags.add(t.replaceAll("[^a-zA-Z0-9\\:]", ""));
-            }
-        } else {
-            this.name = name;
-        }
-
         this.count = count;
         this.epoch = epoch;
         this.host = host;
+        this.tags = new ArrayList<String>();
+        Matcher matcher = tagPattern.matcher(name);
+        if (matcher.find() && matcher.groupCount() == 2) {
+            this.name = name.split("\\[")[0].replaceAll("[^a-zA-Z0-9\\.]", "\\_");
+            for(String t : matcher.group(2).split("\\,")) {
+                String sanitizedTag = t.replaceAll("[^a-zA-Z0-9\\:\\.\\-\\_]", "");
+                String[] keyValuePair = sanitizedTag.split("\\:");
+                if (keyValuePair[0].equals("host")) {
+                    this.host = keyValuePair[1];
+                }else{
+                    this.tags.add(sanitizedTag);
+                }
+            }
+        } else {
+            this.name = name.replaceAll("[^a-zA-Z0-9\\.]", "\\_");
+        }
     }
 
     abstract protected String getType();

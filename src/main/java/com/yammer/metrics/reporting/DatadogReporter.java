@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -65,15 +66,24 @@ public class DatadogReporter extends AbstractPollingReporter implements MetricPr
 
     private DatadogReporter(MetricsRegistry registry, String apiKey, String host) {
         this(registry,
-             MetricPredicate.ALL,
-             VirtualMachineMetrics.getInstance(),
-             new HttpTransport("app.datadoghq.com", apiKey),
-             Clock.defaultClock(),
-             host);
+                MetricPredicate.ALL,
+                VirtualMachineMetrics.getInstance(),
+                new HttpTransport("app.datadoghq.com", apiKey),
+                Clock.defaultClock(),
+                host);
     }
 
     private DatadogReporter(MetricsRegistry registry, String apiKey) {
         this(registry, apiKey, null);
+    }
+
+    public DatadogReporter(URL serviceUrl, String apiKey, String applicationKey) {
+        this(Metrics.defaultRegistry(),
+                MetricPredicate.ALL,
+                VirtualMachineMetrics.getInstance(),
+                new HttpTransport(serviceUrl, apiKey, applicationKey),
+                Clock.defaultClock(),
+                null);
     }
 
     public static void enable(long period, TimeUnit unit, String apiKey) {
@@ -256,5 +266,4 @@ public class DatadogReporter extends AbstractPollingReporter implements MetricPr
         }
         return sb.toString();
     }
-
 }

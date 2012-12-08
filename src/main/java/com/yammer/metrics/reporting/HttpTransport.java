@@ -11,7 +11,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
+import java.net.URL;
 
 public class HttpTransport implements Transport {
     private final HttpClient client;
@@ -20,6 +20,16 @@ public class HttpTransport implements Transport {
     public HttpTransport(String host, String apiKey) {
         this.client = new DefaultHttpClient(new PoolingClientConnectionManager());
         this.seriesUrl = String.format("https://%s/api/v1/series?api_key=%s", host, apiKey);
+    }
+
+    // allow other url paths (useful for testing with postbin etc)
+    public HttpTransport(URL hostUrl, String apiKey, String applicationKey) {
+        this.client = new DefaultHttpClient(new PoolingClientConnectionManager());
+        if (applicationKey != null) {
+            this.seriesUrl = String.format("%s?api_key=%s&application_key=%s", hostUrl, apiKey, applicationKey);
+        } else {
+            this.seriesUrl = String.format("%s?api_key=%s", hostUrl, apiKey);
+        }
     }
 
     public HttpRequest prepare() throws IOException {

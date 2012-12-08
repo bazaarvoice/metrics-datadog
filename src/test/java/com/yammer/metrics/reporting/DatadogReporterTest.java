@@ -1,17 +1,5 @@
 package com.yammer.metrics.reporting;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +10,19 @@ import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.MetricPredicate;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.VirtualMachineMetrics;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DatadogReporterTest {
 
@@ -113,8 +114,8 @@ public class DatadogReporterTest {
         assertEquals(2, transport.numRequests);
         String hostBody = new String(transport.lastRequest.getPostBody(), "UTF-8");
 
-        assertFalse(noHostBody.indexOf("\"host\":\"hostname\"") > -1);
-        assertTrue(hostBody.indexOf("\"host\":\"hostname\"") > -1);
+        assertFalse(noHostBody.contains("\"host\":\"hostname\""));
+        assertTrue(hostBody.contains("\"host\":\"hostname\""));
     }
 
     @SuppressWarnings("unchecked")
@@ -141,6 +142,20 @@ public class DatadogReporterTest {
             assertEquals("with", tags.get(0));
             assertEquals("tags", tags.get(1));
         }
+    }
+
+    @Test
+    public void testHostnameTag() throws UnsupportedEncodingException {
+        Counter counter = metricsRegistry.newCounter(DatadogReporterTest.class,
+                "my.counter2[host:hosttag]");
+        counter.inc();
+
+        assertEquals(0, transport.numRequests);
+        dd.run();
+        assertEquals(1, transport.numRequests);
+        String hostBody = new String(transport.lastRequest.getPostBody(), "UTF-8");
+
+        assertTrue(hostBody.contains("\"host\":\"hosttag\""));
     }
 }
 
