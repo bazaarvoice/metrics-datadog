@@ -1,7 +1,5 @@
 package com.yammer.metrics.reporting;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yammer.metrics.core.Clock;
 import com.yammer.metrics.core.Counter;
@@ -32,7 +30,6 @@ public class DatadogReporterTest {
     Clock clock;
     DatadogReporter ddNoHost;
     DatadogReporter dd;
-    static final MetricPredicate ALL = MetricPredicate.ALL;
 
     @Before
     public void setUp() {
@@ -51,8 +48,7 @@ public class DatadogReporterTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testBasicSend() throws JsonParseException, JsonMappingException,
-            IOException {
+    public void testBasicSend() throws IOException {
         dd.printVmMetrics = false;
 
         Counter counter = metricsRegistry.newCounter(DatadogReporterTest.class,
@@ -97,6 +93,31 @@ public class DatadogReporterTest {
         assertEquals("gauge", gaugeEntry.get("type"));
         points = (List<List<Number>>) gaugeEntry.get("points");
         assertEquals(123, points.get(0).get(1));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testIgnoresNonNumericGauge() throws IOException {
+        dd.printVmMetrics = false;
+
+        metricsRegistry.newGauge(DatadogReporterTest.class, "my.string",
+                new Gauge<String>() {
+                    @Override
+                    public String value() {
+                        return "hello";
+                    }
+                });
+        assertEquals(0, transport.numRequests);
+        dd.run();
+        assertEquals(1, transport.numRequests);
+
+        String body = new String(transport.lastRequest.getPostBody(), "UTF-8");
+        Map<String, Object> request = new ObjectMapper().readValue(body,
+                                                                   HashMap.class);
+        assertEquals(1, request.keySet().size());
+
+        List<Object> series = (List<Object>) request.get("series");
+        assertTrue(series.isEmpty());
     }
 
     @Test

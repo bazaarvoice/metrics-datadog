@@ -138,9 +138,12 @@ public class DatadogReporter extends AbstractPollingReporter implements MetricPr
     public void processGauge(MetricName name, Gauge<?> gauge, Long epoch) throws Exception {
         Object value = gauge.value();
         if (value instanceof Boolean) {
-            value = ((Boolean) value) ? 1 : 0;
+            pushGauge(name, ((Boolean) value) ? 1 : 0, epoch);
+        } else if (value instanceof Number) {
+            pushGauge(name, (Number) value, epoch);
         }
-        pushGauge(name, (Number) value, epoch);
+
+        // Any other types are silently ignored.
     }
 
     public void processHistogram(MetricName name, Histogram histogram, Long epoch) throws Exception {
