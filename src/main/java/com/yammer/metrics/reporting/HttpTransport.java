@@ -6,6 +6,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.util.EntityUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -18,18 +21,26 @@ public class HttpTransport implements Transport {
     private final String seriesUrl;
 
     public HttpTransport(String host, String apiKey) {
-        this.client = new DefaultHttpClient(new PoolingClientConnectionManager());
+        this.client = newHttpClient();
         this.seriesUrl = String.format("https://%s/api/v1/series?api_key=%s", host, apiKey);
     }
 
     // allow other url paths (useful for testing with postbin etc)
     public HttpTransport(URL hostUrl, String apiKey, String applicationKey) {
-        this.client = new DefaultHttpClient(new PoolingClientConnectionManager());
+        this.client = newHttpClient();
         if (applicationKey != null) {
             this.seriesUrl = String.format("%s?api_key=%s&application_key=%s", hostUrl, apiKey, applicationKey);
         } else {
             this.seriesUrl = String.format("%s?api_key=%s", hostUrl, apiKey);
         }
+    }
+
+    private static HttpClient newHttpClient() {
+        HttpParams params = new SyncBasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(params, 5000);
+        HttpConnectionParams.setSoTimeout(params, 30000);
+
+        return new DefaultHttpClient(new PoolingClientConnectionManager(), params);
     }
 
     public HttpRequest prepare() throws IOException {
