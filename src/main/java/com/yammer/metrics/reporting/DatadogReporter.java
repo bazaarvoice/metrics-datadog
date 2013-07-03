@@ -153,7 +153,7 @@ public class DatadogReporter extends AbstractPollingReporter implements MetricPr
 
     public void processMeter(MetricName name, Metered meter, Long epoch) throws Exception {
         pushCounter(name, meter.count(), epoch);
-        pushGauge(name, meter.meanRate(), epoch, "mean");
+        pushGauge(name, meter.meanRate(), epoch, "meanRate");
         pushGauge(name, meter.oneMinuteRate(), epoch, "1MinuteRate");
         pushGauge(name, meter.fiveMinuteRate(), epoch, "5MinuteRate");
         pushGauge(name, meter.fifteenMinuteRate(), epoch, "15MinuteRate");
