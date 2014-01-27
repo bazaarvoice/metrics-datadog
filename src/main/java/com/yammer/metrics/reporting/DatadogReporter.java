@@ -126,6 +126,9 @@ public class DatadogReporter extends AbstractPollingReporter implements MetricPr
             jsonOut.writeEndObject();
             jsonOut.flush();
             request.send();
+        } catch (IOException e) {
+            //https://bits.bazaarvoice.com/jira/browse/AGR-253
+            LOG.warn("IO error occurred while sending metrics to datadog", e);
         } catch (Exception e) {
             LOG.error("Error sending metrics", e);
         }
