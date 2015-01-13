@@ -1,5 +1,6 @@
 package io.dropwizard.metrics;
 
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.datadog.Datadog;
@@ -26,6 +27,9 @@ public class DatadogReporterFactory extends BaseReporterFactory {
     @JsonProperty
     private List<String> tags = null;
 
+    @JsonProperty
+    private boolean useRegexFilters = false;
+
     @Override
     public ScheduledReporter build(MetricRegistry registry) {
         Datadog datadog = new Datadog(apiKey, applicationKey);
@@ -36,5 +40,15 @@ public class DatadogReporterFactory extends BaseReporterFactory {
                 .convertDurationsTo(getDurationUnit())
                 .convertRatesTo(getRateUnit())
                 .build(datadog);
+    }
+
+    @Override
+    public MetricFilter getFilter() {
+        return (useRegexFilters() ?
+                new RegexMetricFilter(getIncludes(), getExcludes()) : super.getFilter());
+    }
+
+    public boolean useRegexFilters() {
+        return useRegexFilters;
     }
 }
