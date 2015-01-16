@@ -29,6 +29,7 @@ metrics:
   reporters:
     - type: datadog
       host: <host>
+      tags: <tags>                          # Optional.
       apiKey: <apiKey>
       applicationKey: <applicationKey>      # Optional
       includes:                             # Optional. Defaults to (all).
@@ -44,6 +45,7 @@ metrics:
   reporters:
     - type: datadog
       host: <host>
+      tags: <tags>
       apiKey: <apiKey>
       applicationKey: <applicationKey>      # Optional
       includes:

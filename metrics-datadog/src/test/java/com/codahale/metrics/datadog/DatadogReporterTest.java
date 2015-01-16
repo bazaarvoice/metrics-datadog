@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -36,15 +38,20 @@ public class DatadogReporterTest {
     private final long timestamp = 1000198;
     private final Clock clock = mock(Clock.class);
     private static final String host = "hostname";
+    private static List<String> tags;
+    private static String testTag = "testTag:testValue";
 
     @Before
     public void setUp() {
+        tags = new ArrayList<String>();
+        tags.add(testTag);
         when(clock.getTime()).thenReturn(timestamp * 1000);
         metricsRegistry = new MetricRegistry();
         reporter = DatadogReporter
                 .forRegistry(metricsRegistry)
                 .withHost(host)
                 .withClock(clock)
+                .withTags(tags)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build(datadog);
@@ -62,7 +69,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", (byte) 1, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", (byte) 1, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -82,7 +89,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", (short) 1, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", (short) 1, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -102,7 +109,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", 1, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", 1, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -122,7 +129,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", 1L, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", 1L, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -142,7 +149,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", 1.1f, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", 1.1f, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -162,7 +169,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("gauge", 1.1, timestamp, host);
+        inOrder.verify(datadog).addGauge("gauge", 1.1, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -185,7 +192,7 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addCounter("counter", 100L, timestamp, host);
+        inOrder.verify(datadog).addCounter("counter", 100L, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -222,17 +229,17 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addCounter("histogram.count", 1L, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.max", 2L, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.mean", 3.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.min", 4L, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.stddev", 5.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p50", 6.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p75", 7.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p95", 8.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p98", 9.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p99", 10.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("histogram.p999", 11.0, timestamp, host);
+        inOrder.verify(datadog).addCounter("histogram.count", 1L, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.max", 2L, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.mean", 3.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.min", 4L, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.stddev", 5.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p50", 6.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p75", 7.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p95", 8.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p98", 9.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p99", 10.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("histogram.p999", 11.0, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -259,11 +266,11 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addCounter("meter.count", 1L, timestamp, host);
-        inOrder.verify(datadog).addGauge("meter.1MinuteRate", 2.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("meter.5MinuteRate", 3.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("meter.15MinuteRate", 4.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("meter.meanRate", 5.0, timestamp, host);
+        inOrder.verify(datadog).addCounter("meter.count", 1L, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("meter.1MinuteRate", 2.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("meter.5MinuteRate", 3.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("meter.15MinuteRate", 4.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("meter.meanRate", 5.0, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -314,21 +321,21 @@ public class DatadogReporterTest {
 
         final InOrder inOrder = inOrder(datadog);
         inOrder.verify(datadog).createSeries();
-        inOrder.verify(datadog).addGauge("timer.max", 100.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.mean", 200.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.min", 300.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.stddev", 400.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p50", 500.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p75", 600.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p95", 700.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p98", 800.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p99", 900.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.p999", 1000.0, timestamp, host);
-        inOrder.verify(datadog).addCounter("timer.count", 1L, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.1MinuteRate", 3.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.5MinuteRate", 4.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.15MinuteRate", 5.0, timestamp, host);
-        inOrder.verify(datadog).addGauge("timer.meanRate", 2.0, timestamp, host);
+        inOrder.verify(datadog).addGauge("timer.max", 100.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.mean", 200.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.min", 300.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.stddev", 400.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p50", 500.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p75", 600.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p95", 700.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p98", 800.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p99", 900.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.p999", 1000.0, timestamp, host, tags);
+        inOrder.verify(datadog).addCounter("timer.count", 1L, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.1MinuteRate", 3.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.5MinuteRate", 4.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.15MinuteRate", 5.0, timestamp, host, tags);
+        inOrder.verify(datadog).addGauge("timer.meanRate", 2.0, timestamp, host, tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -349,6 +356,7 @@ public class DatadogReporterTest {
                 .forRegistry(metricsRegistry)
                 .withHost(host)
                 .withClock(clock)
+                .withTags(tags)
                 .filter(new NameMetricFilter("my.metric"))
                 .build(datadog);
 
@@ -359,11 +367,13 @@ public class DatadogReporterTest {
         inOrder.verify(datadog).addCounter("my.metric.counter",
                 123L,
                 timestamp,
-                host);
+                host,
+                tags);
         inOrder.verify(datadog, never()).addCounter("counter",
                 123L,
                 timestamp,
-                host);
+                host,
+                tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -392,27 +402,32 @@ public class DatadogReporterTest {
                 .addCounter("java.lang.String.meter.count[with,tags]",
                         0L,
                         timestamp,
-                        host);
+                        host,
+                        tags);
         inOrder.verify(datadog)
                 .addGauge("java.lang.String.meter.1MinuteRate[with,tags]",
                         0.0,
                         timestamp,
-                        host);
+                        host,
+                        tags);
         inOrder.verify(datadog)
                 .addGauge("java.lang.String.meter.5MinuteRate[with,tags]",
                         0.0,
                         timestamp,
-                        host);
+                        host,
+                        tags);
         inOrder.verify(datadog)
                 .addGauge("java.lang.String.meter.15MinuteRate[with,tags]",
                         0.0,
                         timestamp,
-                        host);
+                        host,
+                        tags);
         inOrder.verify(datadog)
                 .addGauge("java.lang.String.meter.meanRate[with,tags]",
                         0.0,
                         timestamp,
-                        host);
+                        host,
+                        tags);
         inOrder.verify(datadog).endSeries();
         inOrder.verify(datadog).sendSeries();
 
@@ -432,6 +447,7 @@ public class DatadogReporterTest {
                 .forRegistry(metricsRegistry)
                 .withClock(clock)
                 .withHost(host)
+                .withTags(tags)
                 .build(dd);
         DatadogReporter reporterMockSendNoHost = DatadogReporter
                 .forRegistry(metricsRegistry)
