@@ -1,6 +1,12 @@
 # Metrics Datadog Reporter
 Simple Metrics reporter backend that sends metrics to DataDog.
 
+## [DEPRECATED]
+This project is in the process of being deprecated. If you would like to use
+this project, all features here have been merged to 
+[Coursera's fork](https://github.com/coursera/metrics-datadog). Coursera's
+fork has also been released to Maven Central.
+
 ## Usage
 
 ~~~java
