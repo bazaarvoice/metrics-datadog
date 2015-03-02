@@ -2,13 +2,10 @@ package com.yammer.metrics.reporting;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.SyncBasicHttpParams;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -36,11 +33,14 @@ public class HttpTransport implements Transport {
     }
 
     private static HttpClient newHttpClient() {
-        HttpParams params = new SyncBasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(params, 5000);
-        HttpConnectionParams.setSoTimeout(params, 30000);
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(5000)
+            .setSocketTimeout(30000)
+            .build();
 
-        return new DefaultHttpClient(new PoolingClientConnectionManager(), params);
+        return HttpClientBuilder.create()
+            .setDefaultRequestConfig(requestConfig)
+            .build();
     }
 
     public HttpRequest prepare() throws IOException {
