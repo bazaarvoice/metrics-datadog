@@ -20,7 +20,7 @@ public abstract class DatadogSeries<T extends Number> {
     // namespace.metricName[tag1:value1,tag2:value2,etc....]
     private final Pattern tagPattern = Pattern.compile("([\\w\\.]+)\\[([\\w\\W]+)\\]");
 
-    public DatadogSeries(String name, T count, Long epoch, String host) {
+    public DatadogSeries(String name, T count, Long epoch, String host, List<String> additionalTags) {
         this.count = count;
         this.epoch = epoch;
         this.host = host;
@@ -39,6 +39,9 @@ public abstract class DatadogSeries<T extends Number> {
             }
         } else {
             this.name = name.replaceAll("[^a-zA-Z0-9\\.]", "\\_");
+        }
+        if (additionalTags != null) {
+            this.tags.addAll(additionalTags);
         }
     }
 

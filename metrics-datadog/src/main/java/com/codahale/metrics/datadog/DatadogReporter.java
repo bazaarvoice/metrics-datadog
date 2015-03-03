@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +28,7 @@ public class DatadogReporter extends ScheduledReporter {
     private final Clock clock;
     private final String host;
     private final EnumSet<Expansions> expansions;
+    private final List<String> tags;
     private final MetricNameFormatter metricNameFormatter;
     private static final Logger LOG = LoggerFactory
             .getLogger(DatadogReporter.class);
@@ -38,7 +41,8 @@ public class DatadogReporter extends ScheduledReporter {
                             EnumSet<Expansions> expansions,
                             TimeUnit rateUnit,
                             TimeUnit durationUnit,
-                            MetricNameFormatter metricNameFormatter) {
+                            MetricNameFormatter metricNameFormatter,
+                            List<String> tags) {
         super(metricRegistry,
                 "datadog-reporter",
                 filter,
@@ -47,6 +51,7 @@ public class DatadogReporter extends ScheduledReporter {
         this.clock = clock;
         this.host = host;
         this.expansions = expansions;
+        this.tags = tags;
         this.metricNameFormatter = metricNameFormatter;
         this.datadog = datadog;
     }
@@ -96,43 +101,43 @@ public class DatadogReporter extends ScheduledReporter {
             datadog.addGauge(maybeExpand(Expansions.MAX, name),
                     format(convertDuration(snapshot.getMax())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.MEAN, name),
                     format(convertDuration(snapshot.getMean())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.MIN, name),
                     format(convertDuration(snapshot.getMin())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.STD_DEV, name),
                     format(convertDuration(snapshot.getStdDev())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P50, name),
                     format(convertDuration(snapshot.getMedian())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P75, name),
                     format(convertDuration(snapshot.get75thPercentile())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P95, name),
                     format(convertDuration(snapshot.get95thPercentile())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P98, name),
                     format(convertDuration(snapshot.get98thPercentile())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P99, name),
                     format(convertDuration(snapshot.get99thPercentile())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P999, name),
                     format(convertDuration(snapshot.get999thPercentile())),
                     timestamp,
-                    host);
+                    host, tags);
         } catch (Exception e) {
             LOG.error("Error writing timer", e);
         }
@@ -145,23 +150,23 @@ public class DatadogReporter extends ScheduledReporter {
             datadog.addCounter(maybeExpand(Expansions.COUNT, name),
                     meter.getCount(),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.RATE_1_MINUTE, name),
                     format(convertRate(meter.getOneMinuteRate())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.RATE_5_MINUTE, name),
                     format(convertRate(meter.getFiveMinuteRate())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.RATE_15_MINUTE, name),
                     format(convertRate(meter.getFifteenMinuteRate())),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.RATE_MEAN, name),
                     format(convertRate(meter.getMeanRate())),
                     timestamp,
-                    host);
+                    host, tags);
         } catch (Exception e) {
             LOG.error("Error writing meter", e);
         }
@@ -174,47 +179,47 @@ public class DatadogReporter extends ScheduledReporter {
             datadog.addCounter(maybeExpand(Expansions.COUNT, name),
                     histogram.getCount(),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.MAX, name),
                     format(snapshot.getMax()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.MEAN, name),
                     format(snapshot.getMean()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.MIN, name),
                     format(snapshot.getMin()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.STD_DEV, name),
                     format(snapshot.getStdDev()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P50, name),
                     format(snapshot.getMedian()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P75, name),
                     format(snapshot.get75thPercentile()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P95, name),
                     format(snapshot.get95thPercentile()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P98, name),
                     format(snapshot.get98thPercentile()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P99, name),
                     format(snapshot.get99thPercentile()),
                     timestamp,
-                    host);
+                    host, tags);
             datadog.addGauge(maybeExpand(Expansions.P999, name),
                     format(snapshot.get999thPercentile()),
                     timestamp,
-                    host);
+                    host, tags);
         } catch (Exception e) {
             LOG.error("Error writing histogram", e);
         }
@@ -222,7 +227,7 @@ public class DatadogReporter extends ScheduledReporter {
 
     private void reportCounter(String name, Counter counter, long timestamp) {
         try {
-            datadog.addCounter(name, counter.getCount(), timestamp, host);
+            datadog.addCounter(name, counter.getCount(), timestamp, host, tags);
         } catch (Exception e) {
             LOG.error("Error writing counter", e);
         }
@@ -232,7 +237,7 @@ public class DatadogReporter extends ScheduledReporter {
         final Number value = format(gauge.getValue());
         try {
             if (value != null) {
-                datadog.addGauge(name, value, timestamp, host);
+                datadog.addGauge(name, value, timestamp, host, tags);
             }
         } catch (Exception e) {
             LOG.error("Error writing gauge", e);
@@ -298,6 +303,7 @@ public class DatadogReporter extends ScheduledReporter {
         private TimeUnit rateUnit;
         private TimeUnit durationUnit;
         private MetricFilter filter;
+        private List<String> tags;
         private MetricNameFormatter metricNameFormatter;
 
         public Builder(MetricRegistry registry) {
@@ -307,6 +313,7 @@ public class DatadogReporter extends ScheduledReporter {
             this.rateUnit = TimeUnit.SECONDS;
             this.durationUnit = TimeUnit.MILLISECONDS;
             this.filter = MetricFilter.ALL;
+            this.tags = new ArrayList<String>();
             this.metricNameFormatter = new DefaultMetricNameFormatter();
         }
 
@@ -350,6 +357,11 @@ public class DatadogReporter extends ScheduledReporter {
             return this;
         }
 
+        public Builder withTags(List<String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
         @SuppressWarnings("unused")
         public Builder withMetricNameFormatter(MetricNameFormatter formatter) {
             this.metricNameFormatter = formatter;
@@ -366,7 +378,8 @@ public class DatadogReporter extends ScheduledReporter {
                     this.expansions,
                     this.rateUnit,
                     this.durationUnit,
-                    this.metricNameFormatter);
+                    this.metricNameFormatter,
+                    this.tags);
         }
     }
 }

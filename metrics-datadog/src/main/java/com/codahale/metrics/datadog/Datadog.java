@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class Datadog {
     private final String seriesUrl;
@@ -81,13 +82,13 @@ public class Datadog {
         mapper.writeValue(jsonOut, value);
     }
 
-    public void addGauge(String name, Number value, long timestamp, String host)
+    public void addGauge(String name, Number value, long timestamp, String host, List<String> additionalTags)
             throws IOException {
-        add(new DatadogGauge(name, value, timestamp, host));
+        add(new DatadogGauge(name, value, timestamp, host, additionalTags));
     }
 
-    public void addCounter(String name, Long value, long timestamp, String host)
+    public void addCounter(String name, Long value, long timestamp, String host, List<String> additionalTags)
             throws IOException {
-        add(new DatadogCounter(name, value, timestamp, host));
+        add(new DatadogCounter(name, value, timestamp, host, additionalTags));
     }
 }
