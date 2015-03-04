@@ -7,6 +7,8 @@ import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +17,22 @@ public class DatadogReporterFactoryTest {
     public void isDiscoverable() throws Exception {
         Assertions.assertThat(new DiscoverableSubtypeResolver().getDiscoveredSubtypes())
                 .contains(DatadogReporterFactory.class);
+    }
+
+    @Test
+    public void checkForRegexSupportInBaseReporterFactory() {
+        // The RegexMetricFilter used in DatadogReporterFactory is a stop-gap solution to support regex expressions in our metric filters until the relevant change in Dropwizard
+        // (https://github.com/dropwizard/dropwizard/pull/884) becomes available. This test exists to proactively detect the presence of that change and alert the developer
+        // so that he/she can 1.) remove the RegexMetricFilter class and 2.) remove the custom getFilter() and "useRegexFilters" field from the DatadogReporterFactory.
+        Field[] fields = BaseReporterFactory.class.getDeclaredFields();
+        boolean fieldFound = false;
+        for (Field field : fields) {
+            if (field.getName().equals("useRegexFilters")) {
+                fieldFound = true;
+                break;
+            }
+        }
+        Assertions.assertThat(fieldFound).isFalse();
     }
 
     @Test
